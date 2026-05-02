@@ -1,26 +1,24 @@
 import React from 'react';
 import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
 
 import { HeartPulseIcon } from '../components/icons';
 import { RecipeCard } from '../components/RecipeCard';
 import { colors } from '../theme/colors';
 import { spacing } from '../theme/spacing';
 import { Header } from '../components/Header';
+import { SCREENS } from '../constants/screens';
+import { MOCK_SAVED_RECIPES } from '../data/mockData';
 
-export interface Recipe {
-  id: string;
-  title: string;
-  subtitle: string;
-  imageUrl: string;
-  isFavorite: boolean;
-}
+export const FavouritesScreen = () => {
+  const navigation = useNavigation<StackNavigationProp<any>>();
+  const savedRecipes = MOCK_SAVED_RECIPES.filter(r => r.isFavorite);
 
-interface FavouritesScreenProps {
-  savedRecipes?: Recipe[];
-  onDiscoverPress: () => void;
-}
+  const onDiscoverPress = () => {
+    navigation.navigate(SCREENS.HOME_TAB);
+  };
 
-export const FavouritesScreen = ({ savedRecipes = [], onDiscoverPress }: FavouritesScreenProps) => {
   return (
     <View style={styles.container}>
       <Header
@@ -42,6 +40,7 @@ export const FavouritesScreen = ({ savedRecipes = [], onDiscoverPress }: Favouri
               imageUrl={recipe.imageUrl}
               isFavorite={recipe.isFavorite}
               onFavoritePress={() => { }}
+              onPress={() => navigation.navigate(SCREENS.RECIPE_DETAILS, { recipe })}
             />
           ))}
         </ScrollView>

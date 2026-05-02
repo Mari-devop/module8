@@ -10,11 +10,12 @@ interface RecipeCardProps {
   imageUrl: string | any;
   isFavorite: boolean;
   onFavoritePress: () => void;
+  onPress?: () => void;
 }
 
-export const RecipeCard = ({ title, subtitle, imageUrl, isFavorite, onFavoritePress }: RecipeCardProps) => {
+export const RecipeCard = ({ title, subtitle, imageUrl, isFavorite, onFavoritePress, onPress }: RecipeCardProps) => {
   return (
-    <View style={styles.container}>
+    <TouchableOpacity style={styles.container} onPress={onPress} activeOpacity={0.9}>
       <Image 
         source={typeof imageUrl === 'string' ? { uri: imageUrl } : imageUrl} 
         style={styles.image} 
@@ -34,7 +35,7 @@ export const RecipeCard = ({ title, subtitle, imageUrl, isFavorite, onFavoritePr
         <Text style={styles.title}>{title}</Text>
         <Text style={styles.subtitle}>{subtitle}</Text>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 

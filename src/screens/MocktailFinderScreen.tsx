@@ -6,29 +6,18 @@ import { SearchBar } from '../components/SearchBar';
 import { RecipeCard } from '../components/RecipeCard';
 import { colors } from '../theme/colors';
 import { spacing } from '../theme/spacing';
+import { MOCK_SAVED_RECIPES } from '../data/mockData';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { SCREENS } from '../constants/screens';
 
 const CATEGORIES = ['All', 'Refreshing', 'Fruity', 'Sparkling', 'Citrus', 'Sweet', 'Sour', 'Herbal', 'Spicy'];
 const INGREDIENTS = ['Mint', 'Lime', 'Berry', 'Citrus', 'Ginger', 'Cucumber', 'Tropical'];
-const RECIPES = [
-  {
-    id: '1',
-    title: 'Virgin Mojito',
-    subtitle: 'Refreshing Mint & Lime',
-    imageUrl: 'https://images.unsplash.com/photo-1551538827-9c037cb4f32a?q=80&w=600&auto=format&fit=crop',
-    isFavorite: true,
-  },
-  {
-    id: '2',
-    title: 'Orange Sunshine',
-    subtitle: 'Bright Citrus Blend',
-    imageUrl: 'https://images.unsplash.com/photo-1600271886742-f049cd451b66?q=80&w=600&auto=format&fit=crop',
-    isFavorite: false,
-  },
-];
 
 export const MocktailFinderScreen = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
+  const navigation = useNavigation<StackNavigationProp<any>>();
 
   return (
     <View style={styles.container}>
@@ -78,16 +67,19 @@ export const MocktailFinderScreen = () => {
         </View>
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Featured Recipes</Text>
-          {RECIPES.map((recipe) => (
-            <RecipeCard
-              key={recipe.id}
-              title={recipe.title}
-              subtitle={recipe.subtitle}
-              imageUrl={recipe.imageUrl}
-              isFavorite={recipe.isFavorite}
-              onFavoritePress={() => { }}
-            />
-          ))}
+          <View style={styles.recipeListContainer}>
+            {MOCK_SAVED_RECIPES.map((recipe) => (
+              <RecipeCard
+                key={recipe.id}
+                title={recipe.title}
+                subtitle={recipe.subtitle}
+                imageUrl={recipe.imageUrl}
+                isFavorite={recipe.isFavorite}
+                onFavoritePress={() => { }}
+                onPress={() => navigation.navigate(SCREENS.RECIPE_DETAILS, { recipe })}
+              />
+            ))}
+          </View>
         </View>
       </ScrollView>
     </View>
@@ -122,6 +114,9 @@ const styles = StyleSheet.create({
   wrapList: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+    paddingHorizontal: spacing.l,
+  },
+  recipeListContainer: {
     paddingHorizontal: spacing.l,
   },
 });
