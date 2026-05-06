@@ -9,11 +9,12 @@ import { colors } from '../theme/colors';
 import { spacing } from '../theme/spacing';
 import { Header } from '../components/Header';
 import { SCREENS } from '../constants/screens';
-import { MOCK_SAVED_RECIPES } from '../data/mockData';
+import { useFavorites } from '../context/FavoritesContext';
 
 export const FavouritesScreen = () => {
   const navigation = useNavigation<StackNavigationProp<any>>();
-  const savedRecipes = MOCK_SAVED_RECIPES.filter(r => r.isFavorite);
+  const { favorites, toggleFavorite } = useFavorites();
+  const savedRecipes = favorites;
 
   const onDiscoverPress = () => {
     navigation.navigate(SCREENS.HOME_TAB);
@@ -38,9 +39,12 @@ export const FavouritesScreen = () => {
               title={recipe.title}
               subtitle={recipe.subtitle}
               imageUrl={recipe.imageUrl}
-              isFavorite={recipe.isFavorite}
-              onFavoritePress={() => { }}
-              onPress={() => navigation.navigate(SCREENS.RECIPE_DETAILS, { recipe })}
+              isFavorite={true}
+              onFavoritePress={() => toggleFavorite(recipe)}
+              onPress={() => navigation.navigate(SCREENS.HOME_TAB, { 
+                screen: SCREENS.RECIPE_DETAILS, 
+                params: { recipe } 
+              })}
             />
           ))}
         </ScrollView>
@@ -126,3 +130,4 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 });
+
