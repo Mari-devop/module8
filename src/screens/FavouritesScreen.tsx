@@ -5,23 +5,24 @@ import { StackNavigationProp } from '@react-navigation/stack';
 
 import { HeartPulseIcon } from '../components/icons';
 import { RecipeCard } from '../components/RecipeCard';
-import { colors } from '../theme/colors';
 import { spacing } from '../theme/spacing';
 import { Header } from '../components/Header';
 import { SCREENS } from '../constants/screens';
 import { useFavorites } from '../context/FavoritesContext';
+import { useTheme } from '../context/ThemeContext';
 
 export const FavouritesScreen = () => {
   const navigation = useNavigation<StackNavigationProp<any>>();
   const { favorites, toggleFavorite } = useFavorites();
   const savedRecipes = favorites;
+  const { colors } = useTheme();
 
   const onDiscoverPress = () => {
     navigation.navigate(SCREENS.HOME_TAB);
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Header
         title="Favourites"
         subtitle="Your saved mocktail recipes"
@@ -32,7 +33,7 @@ export const FavouritesScreen = () => {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.listContent}
         >
-          <Text style={styles.listCount}>{savedRecipes.length} recipes saved</Text>
+          <Text style={[styles.listCount, { color: colors.subtitle }]}>{savedRecipes.length} recipes saved</Text>
           {savedRecipes.map(recipe => (
             <RecipeCard
               key={recipe.id}
@@ -50,16 +51,16 @@ export const FavouritesScreen = () => {
         </ScrollView>
       ) : (
         <View style={styles.emptyContent}>
-          <View style={styles.iconContainer}>
+          <View style={[styles.iconContainer, { backgroundColor: colors.iconBG }]}>
             <HeartPulseIcon size={32} color={colors.mainBtn} />
           </View>
-          <Text style={styles.title}>No favourites yet</Text>
-          <Text style={styles.subtitle}>
+          <Text style={[styles.title, { color: colors.title }]}>No favourites yet</Text>
+          <Text style={[styles.subtitle, { color: colors.subtitle }]}>
             Start exploring and save your favorite{'\n'}mocktail recipes!
           </Text>
 
-          <TouchableOpacity style={styles.button} onPress={onDiscoverPress} activeOpacity={0.8}>
-            <Text style={styles.buttonText}>Discover Recipes</Text>
+          <TouchableOpacity style={[styles.button, { backgroundColor: colors.activeBadgeBG, shadowColor: colors.activeBadgeBG }]} onPress={onDiscoverPress} activeOpacity={0.8}>
+            <Text style={[styles.buttonText, { color: colors.text }]}>Discover Recipes</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -70,7 +71,6 @@ export const FavouritesScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ffffff',
   },
   emptyContent: {
     flex: 1,
@@ -85,7 +85,6 @@ const styles = StyleSheet.create({
     paddingBottom: 100,
   },
   listCount: {
-    color: colors.subtitle,
     fontSize: 14,
     marginBottom: spacing.m,
     marginLeft: 4,
@@ -94,7 +93,6 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: colors.iconBG,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.l,
@@ -102,30 +100,25 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: '700',
-    color: colors.categoryTitle,
     marginBottom: spacing.s,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 15,
-    color: colors.subtitle,
     textAlign: 'center',
     lineHeight: 22,
     marginBottom: spacing.xl,
   },
   button: {
-    backgroundColor: colors.activeBadgeBG,
     paddingVertical: 14,
     paddingHorizontal: 28,
     borderRadius: 12,
-    shadowColor: colors.activeBadgeBG,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
     elevation: 4,
   },
   buttonText: {
-    color: colors.text,
     fontSize: 16,
     fontWeight: '600',
   },

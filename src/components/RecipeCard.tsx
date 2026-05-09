@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, Dimensions } from 'react-native';
 import { HeartIcon } from './icons';
-import { colors } from '../theme/colors';
 import { spacing } from '../theme/spacing';
+import { useTheme } from '../context/ThemeContext';
 
 interface RecipeCardProps {
   title: string;
@@ -14,14 +14,16 @@ interface RecipeCardProps {
 }
 
 export const RecipeCard = ({ title, subtitle, imageUrl, isFavorite, onFavoritePress, onPress }: RecipeCardProps) => {
+  const { colors } = useTheme();
+
   return (
-    <TouchableOpacity style={styles.container} onPress={onPress} activeOpacity={0.9}>
+    <TouchableOpacity style={[styles.container, { backgroundColor: colors.surface, borderColor: colors.badgeBorder }]} onPress={onPress} activeOpacity={0.9}>
       <Image 
         source={typeof imageUrl === 'string' ? { uri: imageUrl } : imageUrl} 
         style={styles.image} 
       />
       <TouchableOpacity 
-        style={styles.favoriteButton} 
+        style={[styles.favoriteButton, { backgroundColor: colors.badgeBG }]} 
         onPress={onFavoritePress} 
         activeOpacity={0.8}
       >
@@ -32,8 +34,8 @@ export const RecipeCard = ({ title, subtitle, imageUrl, isFavorite, onFavoritePr
         />
       </TouchableOpacity>
       <View style={styles.content}>
-        <Text style={styles.title}>{title}</Text>
-        <Text style={styles.subtitle}>{subtitle}</Text>
+        <Text style={[styles.title, { color: colors.title }]}>{title}</Text>
+        <Text style={[styles.subtitle, { color: colors.subtitle }]}>{subtitle}</Text>
       </View>
     </TouchableOpacity>
   );
@@ -41,12 +43,10 @@ export const RecipeCard = ({ title, subtitle, imageUrl, isFavorite, onFavoritePr
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: colors.badgeBG,
     borderRadius: 16,
     overflow: 'hidden',
     marginBottom: spacing.l,
     borderWidth: 1,
-    borderColor: colors.badgeBorder,
   },
   image: {
     width: '100%',
@@ -57,7 +57,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: spacing.m,
     right: spacing.m,
-    backgroundColor: colors.badgeBG,
     width: 36,
     height: 36,
     borderRadius: 18,
@@ -75,11 +74,9 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: '700',
-    color: colors.title,
     marginBottom: 4,
   },
   subtitle: {
     fontSize: 14,
-    color: colors.subtitle,
   },
 });

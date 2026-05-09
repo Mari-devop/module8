@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, Dimensions, FlatList, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Dimensions, FlatList, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { Header } from '../components/Header';
 import { Badge } from '../components/Badge';
 import { SearchBar } from '../components/SearchBar';
 import { RecipeCard } from '../components/RecipeCard';
-import { colors } from '../theme/colors';
+import { ShuffleIcon } from '../components/icons';
 import { spacing } from '../theme/spacing';
 import { Recipe } from '../data/mockData';
 import { useNavigation } from '@react-navigation/native';
@@ -12,8 +12,11 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { SCREENS } from '../constants/screens';
 import { fetchMocktails } from '../api/api';
 import { useFavorites } from '../context/FavoritesContext';
+import { useTheme } from '../context/ThemeContext';
+import { useSelector } from 'react-redux';
+import { RootState } from '../store/store';
 
-const CATEGORIES = ['All', 'Refreshing', 'Fruity', 'Sparkling', 'Citrus', 'Sweet', 'Sour', 'Herbal', 'Spicy'];
+const CATEGORIES = ['All', 'My Recipes', 'Refreshing', 'Fruity', 'Sparkling', 'Citrus', 'Sweet', 'Sour', 'Herbal', 'Spicy'];
 const INGREDIENTS = ['Mint', 'Lime', 'Berry', 'Citrus', 'Ginger', 'Cucumber', 'Tropical'];
 
 export const MocktailFinderScreen = () => {
@@ -23,8 +26,12 @@ export const MocktailFinderScreen = () => {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [displayLimit, setDisplayLimit] = useState<number>(5);
+
   const navigation = useNavigation<StackNavigationProp<any>>();
   const { isFavorite, toggleFavorite } = useFavorites();
+  const { colors } = useTheme();
+  const customRecipes = useSelector((state: RootState) => state.myRecipes.recipes);
 
   useEffect(() => {
     fetchMocktails()
@@ -38,6 +45,10 @@ export const MocktailFinderScreen = () => {
         setLoading(false);
       });
   }, []);
+
+  useEffect(() => {
+    setDisplayLimit(5);
+  }, [searchQuery, activeCategory, activeIngredients]);
 
   const toggleIngredient = (ing: string) => {
     setActiveIngredients(prev =>
@@ -59,32 +70,32 @@ export const MocktailFinderScreen = () => {
     }
   };
 
-  const filteredRecipes = recipes.filter(recipe => {
+  const allAvailableRecipes = [...[...customRecipes].reverse(), ...recipes];
+
+  const filteredRecipes = allAvailableRecipes.filter(recipe => {
     const titleLower = recipe.title.toLowerCase();
-    
-    // Search
+
     if (searchQuery && !titleLower.includes(searchQuery.toLowerCase())) {
       return false;
     }
-    
-    // Category
-    if (activeCategory !== 'All') {
+
+    if (activeCategory === 'My Recipes') {
+      const isCustom = customRecipes.some(cr => cr.id === recipe.id);
+      if (!isCustom) return false;
+    } else if (activeCategory !== 'All') {
       const keywords = getCategoryKeywords(activeCategory);
       const matchesKeyword = keywords.some(kw => titleLower.includes(kw));
-      
-      // Deterministic fallback so categories are never completely empty
+
       const charSum = recipe.title.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-      const assignedCat = CATEGORIES[(charSum % (CATEGORIES.length - 1)) + 1]; // +1 to avoid 'All'
-      
-      if (!matchesKeyword && assignedCat !== activeCategory) {
+      const assignedCat = CATEGORIES[(charSum % (CATEGORIES.length - 1)) + 1];
+
+      if (!matchesKeyword && assignedCat !== activeCategory && recipe.category !== activeCategory) {
         return false;
       }
     }
 
-    // Ingredients
     if (activeIngredients.length > 0) {
       const matchesAnyIng = activeIngredients.some(ing => titleLower.includes(ing.toLowerCase()));
-      // Deterministic fallback for ingredients too
       const charSum2 = recipe.title.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) * 2;
       const assignedIng = INGREDIENTS[charSum2 % INGREDIENTS.length];
 
@@ -105,7 +116,7 @@ export const MocktailFinderScreen = () => {
         />
       </View>
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Category</Text>
+        <Text style={[styles.sectionTitle, { color: colors.categoryTitle }]}>Category</Text>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -122,7 +133,7 @@ export const MocktailFinderScreen = () => {
         </ScrollView>
       </View>
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Filter by Ingredients</Text>
+        <Text style={[styles.sectionTitle, { color: colors.categoryTitle }]}>Filter by Ingredients</Text>
         <View style={styles.wrapList}>
           <Badge
             label="All"
@@ -139,14 +150,42 @@ export const MocktailFinderScreen = () => {
           ))}
         </View>
       </View>
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Featured Recipes</Text>
+      <View style={[styles.section, { paddingBottom: spacing.s }]}>
+        <View style={styles.sectionHeaderRow}>
+          <Text style={[styles.sectionTitle, { color: colors.categoryTitle, marginBottom: 0, paddingHorizontal: 0 }]}>Featured Recipes</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Text style={[styles.totalCountText, { color: colors.subtitle, marginRight: 12 }]}>{filteredRecipes.length} total</Text>
+            <TouchableOpacity
+              style={{ backgroundColor: colors.activeBadgeBG, width: 36, height: 36, borderRadius: 18, justifyContent: 'center', alignItems: 'center' }}
+              onPress={() => navigation.navigate(SCREENS.RANDOM_TAB)}
+            >
+              <ShuffleIcon size={18} color="#FFFFFF" />
+            </TouchableOpacity>
+          </View>
+        </View>
         {filteredRecipes.length === 0 && !loading && !error && (
-          <Text style={styles.emptyText}>Не знайдено жодного рецепту.</Text>
+          <Text style={[styles.emptyText, { color: colors.subtitle }]}>Не знайдено жодного рецепту.</Text>
         )}
       </View>
     </>
   );
+
+  const renderFooter = () => {
+    if (filteredRecipes.length > displayLimit) {
+      return (
+        <View style={styles.footerContainer}>
+          <TouchableOpacity
+            style={[styles.browseMoreBtn, { backgroundColor: colors.surface, borderColor: colors.badgeBorder }]}
+            activeOpacity={0.8}
+            onPress={() => setDisplayLimit(prev => prev + 5)}
+          >
+            <Text style={[styles.browseMoreText, { color: colors.title }]}>Browse more</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+    return null;
+  };
 
   const renderItem = ({ item }: { item: Recipe }) => (
     <View style={styles.recipeListItem}>
@@ -162,16 +201,16 @@ export const MocktailFinderScreen = () => {
   );
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Header
         title="Mocktail Finder"
-        subtitle="Discover delicious non-alcoholic drinks"
+        subtitle="Discover delicious beverages"
       />
 
       {loading ? (
         <View style={styles.centerContainer}>
-          <ActivityIndicator size="large" color={colors.mainBtn} />
-          <Text style={styles.loadingText}>Завантаження...</Text>
+          <ActivityIndicator size="large" color={colors.activeBadgeBG} />
+          <Text style={[styles.loadingText, { color: colors.title }]}>Завантаження...</Text>
         </View>
       ) : error ? (
         <View style={styles.centerContainer}>
@@ -179,10 +218,11 @@ export const MocktailFinderScreen = () => {
         </View>
       ) : (
         <FlatList
-          data={filteredRecipes}
+          data={filteredRecipes.slice(0, displayLimit)}
           keyExtractor={item => item.id.toString()}
           renderItem={renderItem}
-          ListHeaderComponent={renderHeader}
+          ListHeaderComponent={renderHeader()}
+          ListFooterComponent={renderFooter()}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         />
@@ -194,7 +234,6 @@ export const MocktailFinderScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ffffff',
   },
   scrollContent: {
     paddingBottom: 100,
@@ -206,12 +245,22 @@ const styles = StyleSheet.create({
   section: {
     marginTop: spacing.l,
   },
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: spacing.l,
+    marginBottom: spacing.s,
+  },
   sectionTitle: {
     fontSize: 16,
     fontWeight: '700',
-    color: colors.categoryTitle,
     paddingHorizontal: spacing.l,
     marginBottom: spacing.s,
+  },
+  totalCountText: {
+    fontSize: 14,
+    fontWeight: '500',
   },
   horizontalList: {
     paddingHorizontal: spacing.l,
@@ -233,7 +282,6 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: spacing.m,
     fontSize: 16,
-    color: colors.title,
   },
   errorText: {
     fontSize: 16,
@@ -243,7 +291,24 @@ const styles = StyleSheet.create({
   emptyText: {
     paddingHorizontal: spacing.l,
     fontSize: 15,
-    color: colors.subtitle,
     marginTop: spacing.s,
+  },
+  footerContainer: {
+    paddingHorizontal: spacing.l,
+    paddingTop: spacing.m,
+    paddingBottom: spacing.xl,
+    alignItems: 'center',
+  },
+  browseMoreBtn: {
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+    borderWidth: 1,
+    width: '100%',
+    alignItems: 'center',
+  },
+  browseMoreText: {
+    fontSize: 16,
+    fontWeight: '600',
   },
 });

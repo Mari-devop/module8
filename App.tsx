@@ -6,16 +6,23 @@ import { TabNavigator } from './src/navigation/TabNavigator';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { FavoritesProvider } from './src/context/FavoritesContext';
+import { ThemeProvider } from './src/context/ThemeContext';
+import { Provider } from 'react-redux';
+import { store } from './src/store/store';
 
 export default function App() {
   return (
     <SafeAreaProvider style={{ flex: 1 }}>
       <GestureHandlerRootView style={styles.container}>
-        <FavoritesProvider>
-          <NavigationContainer>
-            <TabNavigator />
-          </NavigationContainer>
-        </FavoritesProvider>
+        <Provider store={store}>
+          <ThemeProvider>
+            <FavoritesProvider>
+              <NavigationContainer>
+                <TabNavigator />
+              </NavigationContainer>
+            </FavoritesProvider>
+          </ThemeProvider>
+        </Provider>
       </GestureHandlerRootView>
     </SafeAreaProvider>
   );

@@ -1,7 +1,7 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet } from 'react-native';
-import { colors } from '../theme/colors';
 import { spacing } from '../theme/spacing';
+import { useTheme } from '../context/ThemeContext';
 
 interface BadgeProps {
   label: string;
@@ -10,22 +10,30 @@ interface BadgeProps {
 }
 
 export const Badge = ({ label, active = false, onPress }: BadgeProps) => {
+  const { colors } = useTheme();
+
   return (
     <TouchableOpacity
-      style={[styles.container, active && styles.activeContainer]}
+      style={[
+        styles.container,
+        { backgroundColor: colors.badgeBG, borderColor: colors.badgeBorder },
+        active && { backgroundColor: colors.activeBadgeBG, borderColor: colors.activeBadgeBG }
+      ]}
       onPress={onPress}
       activeOpacity={0.8}
     >
-      <Text style={[styles.label, active && styles.activeLabel]}>{label}</Text>
+      <Text style={[
+        styles.label,
+        { color: colors.badgeTitle },
+        active && { color: colors.text }
+      ]}>{label}</Text>
     </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: colors.badgeBG,
     borderWidth: 1,
-    borderColor: colors.badgeBorder,
     borderRadius: 20,
     paddingVertical: 8,
     paddingHorizontal: 16,
@@ -33,16 +41,8 @@ const styles = StyleSheet.create({
     marginRight: spacing.s,
     marginBottom: spacing.s,
   },
-  activeContainer: {
-    backgroundColor: colors.activeBadgeBG,
-    borderColor: colors.activeBadgeBG,
-  },
   label: {
-    color: colors.badgeTitle,
     fontSize: 14,
     fontWeight: '500',
-  },
-  activeLabel: {
-    color: colors.text,
   },
 });

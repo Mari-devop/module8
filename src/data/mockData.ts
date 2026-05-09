@@ -7,6 +7,7 @@ export interface Recipe {
   ingredients?: string[];
   instructions?: string;
   duration?: string;
+  category?: string;
 }
 
 export const MOCK_SAVED_RECIPES: Recipe[] = [

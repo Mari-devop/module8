@@ -32,7 +32,7 @@ export const DrawerNavigator = () => {
         component={TabNavigator}
         options={{
           title: 'Home',
-          headerShown: false // Hide drawer header to show screen headers instead
+          headerShown: false
         }}
       />
       <Drawer.Screen

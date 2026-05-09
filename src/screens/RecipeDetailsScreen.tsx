@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, ActivityIndicator, Share } from 'react-native';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
-import { colors } from '../theme/colors';
 import { spacing } from '../theme/spacing';
 import { Recipe } from '../data/mockData';
-import { HeartIcon, ShareIcon } from '../components/icons';
+import { HeartIcon, ShareIcon, ArrowLeftIcon } from '../components/icons';
+import { SafeAreaView } from 'react-native';
 import { useFavorites } from '../context/FavoritesContext';
 import { fetchMocktailDetails } from '../api/api';
+import { useTheme } from '../context/ThemeContext';
 
 type ParamList = {
   RecipeDetails: {
@@ -20,12 +21,20 @@ export const RecipeDetailsScreen = () => {
   const { recipe } = route.params;
   const { isFavorite, toggleFavorite } = useFavorites();
   const isFav = isFavorite(recipe.id);
+  
+  const { colors } = useTheme();
 
   const [details, setDetails] = useState<Partial<Recipe> | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [headerHeight, setHeaderHeight] = useState(380);
 
   useEffect(() => {
+    if (recipe.ingredients && recipe.instructions) {
+      setLoading(false);
+      return;
+    }
+
     fetchMocktailDetails(recipe.id)
       .then(data => {
         setDetails(data);
@@ -48,27 +57,56 @@ export const RecipeDetailsScreen = () => {
       .map(s => s + '.');
   };
 
+  const handleShare = async () => {
+    try {
+      const message = `Check out this mocktail recipe: ${recipe.title}!\n\nIngredients: \n${ingredientsToDisplay.join(', ')}\n\nInstructions: \n${instructionsToDisplay}\n\nImage: ${recipe.imageUrl}`;
+      await Share.share({
+        message,
+        title: recipe.title,
+      });
+    } catch (error: any) {
+      console.error(error.message);
+    }
+  };
+
   return (
-    <ScrollView style={styles.container} bounces={false} showsVerticalScrollIndicator={false}>
-      <Image source={{ uri: recipe.imageUrl }} style={styles.image} />
-      <View style={styles.content}>
-        <View style={styles.header}>
-          <View style={styles.titleContainer}>
-            <Text style={styles.title}>{recipe.title}</Text>
-            <Text style={styles.subtitle}>{recipe.subtitle}</Text>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <View 
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10 }}
+        onLayout={(e) => setHeaderHeight(e.nativeEvent.layout.height)}
+      >
+        <View style={{ position: 'relative' }}>
+          <Image source={{ uri: recipe.imageUrl }} style={styles.image} />
+          <View style={{ position: 'absolute', top: 50, left: spacing.l, right: spacing.l, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+             <TouchableOpacity style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: colors.surface, justifyContent: 'center', alignItems: 'center' }} onPress={() => navigation.goBack()}>
+               <ArrowLeftIcon size={24} color={colors.title} />
+             </TouchableOpacity>
           </View>
         </View>
-
-        {recipe.duration && (
-          <View style={styles.infoBadge}>
-            <Text style={styles.infoText}>Duration: {recipe.duration}</Text>
+        <View style={{ paddingHorizontal: 12 }}>
+          <View style={[{ backgroundColor: colors.surface, padding: spacing.l, borderRadius: 16, marginTop: -40, shadowColor: '#000', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.1, shadowRadius: 15, elevation: 10 }]}>
+            <View style={styles.titleContainer}>
+              <Text style={[styles.title, { color: colors.title }]}>{recipe.title}</Text>
+              <Text style={[styles.subtitle, { color: colors.subtitle }]}>{recipe.subtitle}</Text>
+            </View>
+            <View style={[styles.infoBadge, { backgroundColor: `${colors.activeBadgeBG}15`, marginBottom: 0, marginTop: spacing.m, paddingVertical: 6, paddingHorizontal: 12, borderRadius: 16 }]}>
+              <Text style={[styles.infoText, { color: colors.activeBadgeBG }]}>{recipe.category || 'Herbal'}</Text>
+            </View>
           </View>
-        )}
+        </View>
+      </View>
+
+      <ScrollView 
+        style={{ flex: 1 }} 
+        bounces={false} 
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingTop: headerHeight + spacing.l, paddingHorizontal: spacing.l, paddingBottom: 100 }}
+      >
 
         {loading ? (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color={colors.activeBadgeBG} />
-            <Text style={styles.loadingText}>Завантаження деталей...</Text>
+            <Text style={[styles.loadingText, { color: colors.title }]}>Завантаження деталей...</Text>
           </View>
         ) : error ? (
           <View style={styles.loadingContainer}>
@@ -76,55 +114,58 @@ export const RecipeDetailsScreen = () => {
           </View>
         ) : (
           <>
-            <Text style={styles.sectionTitle}>Ingredients</Text>
-            <View style={styles.ingredientsList}>
-              {ingredientsToDisplay.map((ing, idx) => (
-                <View key={idx} style={styles.ingredientItem}>
-                  <Text style={styles.ingredientBullet}>•</Text>
-                  <Text style={styles.ingredientText}>{ing}</Text>
-                </View>
-              ))}
-              {ingredientsToDisplay.length === 0 && (
-                <Text style={styles.instructionsText}>No ingredients found.</Text>
-              )}
+            <View style={[styles.card, { backgroundColor: colors.surface }]}>
+              <Text style={[styles.cardTitle, { color: colors.title }]}>Ingredients</Text>
+              <View style={styles.ingredientsList}>
+                {ingredientsToDisplay.map((ing, idx) => (
+                  <View key={idx} style={styles.ingredientItem}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+                      <Text style={[styles.ingredientBullet, { color: colors.activeBadgeBG }]}>•</Text>
+                      <Text style={[styles.ingredientText, { color: colors.title }]}>{ing}</Text>
+                    </View>
+                  </View>
+                ))}
+                {ingredientsToDisplay.length === 0 && (
+                  <Text style={[styles.instructionsText, { color: colors.subtitle }]}>No ingredients found.</Text>
+                )}
+              </View>
             </View>
 
-            <View style={styles.stepsCard}>
-              <Text style={styles.stepsCardTitle}>Preparation Steps</Text>
+            <View style={[styles.card, { backgroundColor: colors.surface }]}>
+              <Text style={[styles.cardTitle, { color: colors.title }]}>Preparation Steps</Text>
               <View style={styles.stepsList}>
                 {parseInstructions(instructionsToDisplay).map((step, idx) => (
                   <View key={idx} style={styles.stepItem}>
-                    <View style={styles.stepBadge}>
+                    <View style={[styles.stepBadge, { backgroundColor: colors.activeBadgeBG }]}>
                       <Text style={styles.stepNumber}>{idx + 1}</Text>
                     </View>
-                    <Text style={styles.stepText}>{step}</Text>
+                    <Text style={[styles.stepText, { color: colors.categoryTitle }]}>{step}</Text>
                   </View>
                 ))}
               </View>
             </View>
 
-            <TouchableOpacity style={styles.addFavoriteBtn} onPress={() => toggleFavorite(recipe)} activeOpacity={0.8}>
+            <TouchableOpacity style={[styles.addFavoriteBtn, { backgroundColor: colors.activeBadgeBG }]} onPress={() => toggleFavorite(recipe)} activeOpacity={0.8}>
               <HeartIcon size={20} color={'#ffffff'} focused={isFav} />
               <Text style={styles.addFavoriteBtnText}>
                 {isFav ? 'Remove from Favorites' : 'Add to Favorites'}
               </Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.shareBtn} onPress={() => {}} activeOpacity={0.8}>
+            <TouchableOpacity style={[styles.shareBtn, { backgroundColor: colors.surface, borderColor: colors.badgeBorder }]} onPress={handleShare} activeOpacity={0.8}>
               <ShareIcon size={20} color={colors.title} />
-              <Text style={styles.shareBtnText}>Share Recipe</Text>
+              <Text style={[styles.shareBtnText, { color: colors.title }]}>Share Recipe</Text>
             </TouchableOpacity>
           </>
         )}
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ffffff',
   },
   image: {
     width: '100%',
@@ -135,7 +176,6 @@ const styles = StyleSheet.create({
     padding: spacing.l,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    backgroundColor: '#ffffff',
     marginTop: -24,
   },
   header: {
@@ -151,15 +191,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: colors.title,
     marginBottom: 4,
   },
   subtitle: {
     fontSize: 16,
-    color: colors.subtitle,
   },
   infoBadge: {
-    backgroundColor: colors.badgeBG,
     alignSelf: 'flex-start',
     paddingHorizontal: spacing.m,
     paddingVertical: spacing.s,
@@ -167,15 +204,22 @@ const styles = StyleSheet.create({
     marginBottom: spacing.l,
   },
   infoText: {
-    color: colors.title,
     fontWeight: '600',
   },
-  sectionTitle: {
+  card: {
+    borderRadius: 14,
+    padding: spacing.l,
+    marginBottom: spacing.l,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  cardTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: colors.title,
-    marginTop: spacing.m,
-    marginBottom: spacing.m,
+    fontWeight: '700',
+    marginBottom: spacing.l,
   },
   ingredientsList: {
     marginBottom: spacing.l,
@@ -183,41 +227,20 @@ const styles = StyleSheet.create({
   ingredientItem: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     marginBottom: 8,
   },
   ingredientBullet: {
     fontSize: 20,
-    color: colors.mainBtn,
     marginRight: 8,
   },
   ingredientText: {
     fontSize: 16,
-    color: colors.title,
   },
   instructionsText: {
     fontSize: 16,
-    color: colors.subtitle,
     lineHeight: 24,
     marginBottom: spacing.xxl,
-  },
-  stepsCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: colors.badgeBorder,
-    padding: spacing.l,
-    marginBottom: spacing.xl,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  stepsCardTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: colors.title,
-    marginBottom: spacing.l,
   },
   stepsList: {
     flexDirection: 'column',
@@ -231,7 +254,6 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: colors.activeBadgeBG,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: spacing.m,
@@ -245,11 +267,9 @@ const styles = StyleSheet.create({
   stepText: {
     flex: 1,
     fontSize: 15,
-    color: colors.categoryTitle,
     lineHeight: 22,
   },
   addFavoriteBtn: {
-    backgroundColor: colors.activeBadgeBG,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -264,18 +284,15 @@ const styles = StyleSheet.create({
     marginLeft: spacing.s,
   },
   shareBtn: {
-    backgroundColor: '#ffffff',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 16,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: colors.badgeBorder,
     marginBottom: spacing.xxl,
   },
   shareBtnText: {
-    color: colors.title,
     fontSize: 16,
     fontWeight: '600',
     marginLeft: spacing.s,
@@ -286,7 +303,6 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     marginTop: spacing.m,
-    color: colors.title,
   },
   errorText: {
     color: 'red',

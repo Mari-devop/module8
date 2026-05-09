@@ -1,8 +1,9 @@
 import React from 'react';
-import { View, Text, StyleSheet, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { colors } from '../theme/colors';
+import { useTheme } from '../context/ThemeContext';
 import { spacing } from '../theme/spacing';
+import { MartiniIcon, MoonIcon, SunIcon } from './icons';
 
 interface HeaderProps {
   title: string;
@@ -10,17 +11,35 @@ interface HeaderProps {
 }
 
 export const Header = ({ title, subtitle }: HeaderProps) => {
+  const { theme, toggleTheme, colors } = useTheme();
+
+  const gradientColors = theme === 'light'
+    ? ['#00BBA7', '#0092B8'] as const
+    : ['#00786F', '#005F78'] as const;
+
   return (
     <LinearGradient
-      colors={['#00BBA7', '#0092B8']}
+      colors={gradientColors}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={styles.headerBackground}
     >
       <SafeAreaView>
         <View style={styles.headerContent}>
-          <Text style={styles.headerTitle}>{title}</Text>
-          <Text style={styles.headerSubtitle}>{subtitle}</Text>
+          <View style={{ flex: 1 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
+              <View style={{ marginRight: 12, marginTop: -14 }}>
+                <MartiniIcon size={24} color="#FFFFFF" />
+              </View>
+              <Text style={[styles.headerTitle, { color: '#FFFFFF', marginBottom: 0, marginTop: 4 }]}>{title}</Text>
+            </View>
+            {!!subtitle && (
+              <Text style={[styles.headerSubtitle, { color: '#FFFFFF' }]}>{subtitle}</Text>
+            )}
+          </View>
+          <TouchableOpacity style={styles.themeToggle} onPress={toggleTheme}>
+            {theme === 'light' ? <MoonIcon size={20} color="#FFFFFF" /> : <SunIcon size={20} color="#FFFFFF" />}
+          </TouchableOpacity>
         </View>
       </SafeAreaView>
     </LinearGradient>
@@ -29,23 +48,33 @@ export const Header = ({ title, subtitle }: HeaderProps) => {
 
 const styles = StyleSheet.create({
   headerBackground: {
-    borderBottomLeftRadius: 30,
-    borderBottomRightRadius: 30,
     overflow: 'hidden',
     paddingBottom: spacing.l,
   },
   headerContent: {
     paddingHorizontal: spacing.l,
     paddingTop: spacing.m,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  textContainer: {
+    flex: 1,
   },
   headerTitle: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: colors.text,
     marginBottom: spacing.xs,
   },
   headerSubtitle: {
     fontSize: 16,
-    color: colors.text,
+  },
+  themeToggle: {
+    padding: spacing.s,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    borderRadius: 20,
+  },
+  themeToggleText: {
+    fontSize: 24,
   },
 });

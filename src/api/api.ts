@@ -31,6 +31,9 @@ export const fetchMocktailDetails = async (id: string): Promise<Partial<Recipe>>
       throw new Error('Network response was not ok');
     }
     const data = await response.json();
+    if (!data.drinks) {
+      return {};
+    }
     const drink = data.drinks[0];
     const ingredients: string[] = [];
     for (let i = 1; i <= 15; i++) {

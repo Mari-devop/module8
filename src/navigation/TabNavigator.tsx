@@ -3,20 +3,23 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { StackNavigator } from './StackNavigator';
 import { FavouritesScreen } from '../screens/FavouritesScreen';
 import { RandomScreen } from '../screens/RandomScreen';
+import { AddRecipeScreen } from '../screens/AddRecipeScreen';
 import { SCREENS } from '../constants/screens';
-import { colors } from '../theme/colors';
-import { HomeIcon, HeartIcon, ShuffleIcon } from '../components/icons';
+import { useTheme } from '../context/ThemeContext';
+import { HomeIcon, HeartIcon, AddRecipeIcon } from '../components/icons';
 
 const Tab = createBottomTabNavigator();
 
 export const TabNavigator = () => {
+  const { colors } = useTheme();
+
   return (
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
         tabBarShowLabel: true,
         tabBarStyle: {
-          backgroundColor: '#ffffff',
+          backgroundColor: colors.surface,
           borderTopWidth: 1,
           borderTopColor: colors.badgeBorder,
           height: 80,
@@ -51,13 +54,14 @@ export const TabNavigator = () => {
           )
         }}
       />
+
       <Tab.Screen
-        name={SCREENS.RANDOM_TAB}
-        component={RandomScreen}
+        name={SCREENS.ADD_RECIPE_TAB}
+        component={AddRecipeScreen}
         options={{
-          tabBarLabel: 'Random',
+          tabBarLabel: 'Add Recipe',
           tabBarIcon: ({ color, focused }) => (
-            <ShuffleIcon size={24} color={color} focused={focused} />
+            <AddRecipeIcon size={24} color={color} focused={focused} />
           )
         }}
       />

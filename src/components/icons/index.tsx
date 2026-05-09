@@ -1,5 +1,5 @@
 import * as React from 'react';
-import Svg, { Path, G, Defs, ClipPath, Rect, SvgProps } from 'react-native-svg';
+import Svg, { Path, G, Defs, ClipPath, Rect, SvgProps, Mask } from 'react-native-svg';
 
 export interface IconProps extends SvgProps {
   color?: string;
@@ -179,5 +179,89 @@ export const ShareIcon = ({ size = 16, color = '#364153', ...props }: IconProps)
         <Rect width="16" height="16" fill="white" />
       </ClipPath>
     </Defs>
+  </Svg>
+);
+
+export const ListIcon = ({ size = 24, color = '#99A1AF', focused, ...props }: IconProps) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" {...props}>
+    <Path
+      d="M8 6H21M8 12H21M8 18H21M3 6H3.01M3 12H3.01M3 18H3.01"
+      stroke={focused ? color : color}
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </Svg>
+);
+
+export const MartiniIcon = ({ size = 24, color = '#FFFFFF', ...props }: IconProps) => (
+  <Svg width={size} height={Number(size) * (43/24)} viewBox="0 0 24 43" fill="none" {...props}>
+    <Mask id="mask0_118_3352" maskUnits="userSpaceOnUse" x="0" y="3" width="24" height="40">
+      <Path d="M0 3.39844H24V42.6667H0V3.39844Z" fill="white"/>
+    </Mask>
+    <G mask="url(#mask0_118_3352)">
+      <Path d="M23.7444 12.324C24.073 12.017 24.0866 11.5065 23.7747 11.1834C23.4624 10.8603 22.9432 10.847 22.6143 11.1537L20.6835 12.9557C19.2499 14.294 17.2708 14.9379 15.3159 14.6471C14.804 14.5709 14.3043 14.4336 13.8289 14.2247C12.7098 13.7334 11.7906 12.9026 10.6571 12.4419C9.97666 12.1652 9.25266 12.017 8.51988 11.9809L5.60688 3.87354C5.47481 3.50568 5.06444 3.31299 4.69084 3.44284C4.31696 3.57269 4.12069 3.97586 4.25276 4.34372L8.51253 16.2167L6.48813 12.1558C5.69738 12.329 4.93293 12.6198 4.24032 13.008L4.2389 13.0088C3.91932 13.1898 3.51659 13.1426 3.24905 12.8929L1.38558 11.1537C1.05695 10.847 0.537697 10.8603 0.225469 11.1834C-0.0864761 11.5065 -0.0731839 12.017 0.25573 12.324L11.1795 22.5195V40.4901C11.1795 40.5154 11.1585 40.5365 11.1328 40.537C8.50772 40.6182 6.50086 41.0612 6.50086 41.5953C6.50086 42.1873 8.96277 42.6669 12.0002 42.6669C15.0374 42.6669 17.4993 42.1873 17.4993 41.5953C17.4993 41.0612 15.4924 40.6182 12.8673 40.537C12.8416 40.5365 12.8207 40.5154 12.8207 40.4901V22.5195L23.7444 12.324Z" fill={color}/>
+    </G>
+    <Path d="M15.7327 9.84247C15.7327 10.2659 15.384 10.6088 14.9533 10.6088C14.5228 10.6088 14.1738 10.2659 14.1738 9.84247C14.1738 9.41901 14.5228 9.07617 14.9533 9.07617C15.384 9.07617 15.7327 9.41901 15.7327 9.84247Z" fill={color}/>
+    <Path d="M11.5062 7.18023C11.5062 7.51444 11.2307 7.78526 10.8911 7.78526C10.5511 7.78526 10.2754 7.51444 10.2754 7.18023C10.2754 6.84601 10.5511 6.5752 10.8911 6.5752C11.2307 6.5752 11.5062 6.84601 11.5062 7.18023Z" fill={color}/>
+    <Path d="M13.6274 2.25951C13.6274 2.65323 13.3027 2.97215 12.9026 2.97215C12.5021 2.97215 12.1777 2.65323 12.1777 2.25951C12.1777 1.86635 12.5021 1.54688 12.9026 1.54688C13.3027 1.54688 13.6274 1.86635 13.6274 2.25951Z" fill={color}/>
+    <Path d="M19.7135 0.766302C19.7135 1.18949 19.3645 1.53288 18.934 1.53288C18.5036 1.53288 18.1543 1.18949 18.1543 0.766302C18.1543 0.343112 18.5036 0 18.934 0C19.3645 0 19.7135 0.343112 19.7135 0.766302Z" fill={color}/>
+  </Svg>
+);
+
+export const AddRecipeIcon = ({ size = 24, color = '#99A1AF', focused, ...props }: IconProps) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" {...props}>
+    <Path
+      d="M12 5V19M5 12H19"
+      stroke={focused ? color : color}
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </Svg>
+);
+
+export const XIcon = ({ size = 20, color = '#99A1AF', focused, ...props }: IconProps) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" {...props}>
+    <Path
+      d="M18 6L6 18M6 6L18 18"
+      stroke={focused ? color : color}
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </Svg>
+);
+
+export const MoonIcon = ({ size = 14, color = 'white', ...props }: IconProps) => (
+  <Svg width={size} height={size} viewBox="0 0 14 14" fill="none" {...props}>
+    <Path d="M6.83399 0.833008C6.03834 1.62866 5.59135 2.70779 5.59135 3.83301C5.59135 4.95823 6.03834 6.03736 6.83399 6.83301C7.62964 7.62866 8.70877 8.07565 9.83399 8.07565C10.9592 8.07565 12.0383 7.62866 12.834 6.83301C12.834 8.0197 12.4821 9.17973 11.8228 10.1664C11.1635 11.1531 10.2264 11.9222 9.13009 12.3763C8.03373 12.8304 6.82733 12.9492 5.66345 12.7177C4.49956 12.4862 3.43046 11.9148 2.59135 11.0756C1.75223 10.2365 1.18079 9.16744 0.949275 8.00355C0.717764 6.83966 0.836584 5.63326 1.29071 4.53691C1.74484 3.44055 2.51387 2.50348 3.50057 1.84419C4.48726 1.1849 5.6473 0.833008 6.83399 0.833008Z" stroke={color} strokeWidth={1.66667} strokeLinecap="round" strokeLinejoin="round"/>
+  </Svg>
+);
+
+export const SunIcon = ({ size = 16, color = 'white', ...props }: IconProps) => (
+  <Svg width={size} height={size} viewBox="0 0 16 16" fill="none" {...props}>
+    <G clipPath="url(#clip0_120_3391)">
+      <Path d="M8.00065 10.6663C9.47341 10.6663 10.6673 9.47243 10.6673 7.99967C10.6673 6.52692 9.47341 5.33301 8.00065 5.33301C6.52789 5.33301 5.33398 6.52692 5.33398 7.99967C5.33398 9.47243 6.52789 10.6663 8.00065 10.6663Z" stroke={color} strokeWidth={1.66667} strokeLinecap="round" strokeLinejoin="round"/>
+      <Path d="M8 1.33301V2.66634" stroke={color} strokeWidth={1.66667} strokeLinecap="round" strokeLinejoin="round"/>
+      <Path d="M8 13.333V14.6663" stroke={color} strokeWidth={1.66667} strokeLinecap="round" strokeLinejoin="round"/>
+      <Path d="M3.28711 3.28711L4.22711 4.22711" stroke={color} strokeWidth={1.66667} strokeLinecap="round" strokeLinejoin="round"/>
+      <Path d="M11.7734 11.7734L12.7134 12.7134" stroke={color} strokeWidth={1.66667} strokeLinecap="round" strokeLinejoin="round"/>
+      <Path d="M1.33398 8H2.66732" stroke={color} strokeWidth={1.66667} strokeLinecap="round" strokeLinejoin="round"/>
+      <Path d="M13.334 8H14.6673" stroke={color} strokeWidth={1.66667} strokeLinecap="round" strokeLinejoin="round"/>
+      <Path d="M4.22711 11.7734L3.28711 12.7134" stroke={color} strokeWidth={1.66667} strokeLinecap="round" strokeLinejoin="round"/>
+      <Path d="M12.7134 3.28711L11.7734 4.22711" stroke={color} strokeWidth={1.66667} strokeLinecap="round" strokeLinejoin="round"/>
+    </G>
+    <Defs>
+      <ClipPath id="clip0_120_3391">
+        <Rect width="16" height="16" fill="white"/>
+      </ClipPath>
+    </Defs>
+  </Svg>
+);
+
+export const ArrowLeftIcon = ({ size = 24, color = '#FFFFFF', ...props }: IconProps) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" {...props}>
+    <Path d="M15 18L9 12L15 6" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
   </Svg>
 );
