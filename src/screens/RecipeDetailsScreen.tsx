@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, ActivityIndicator, Share } from 'react-native';
-import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
+import { View, Text, StyleSheet, Animated, ScrollView, TouchableOpacity, ActivityIndicator, Share } from 'react-native';
+import { RouteProp, useNavigation, useRoute, useFocusEffect } from '@react-navigation/native';
 import { spacing } from '../theme/spacing';
 import { Recipe } from '../data/mockData';
 import { HeartIcon, ShareIcon, ArrowLeftIcon } from '../components/icons';
@@ -28,6 +28,19 @@ export const RecipeDetailsScreen = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [headerHeight, setHeaderHeight] = useState(380);
+
+  const imageOpacity = useRef(new Animated.Value(0)).current;
+
+  useFocusEffect(
+    useCallback(() => {
+      imageOpacity.setValue(0);
+      Animated.timing(imageOpacity, {
+        toValue: 1,
+        duration: 500,
+        useNativeDriver: true,
+      }).start();
+    }, [imageOpacity])
+  );
 
   useEffect(() => {
     if (recipe.ingredients && recipe.instructions) {
@@ -76,7 +89,7 @@ export const RecipeDetailsScreen = () => {
         onLayout={(e) => setHeaderHeight(e.nativeEvent.layout.height)}
       >
         <View style={{ position: 'relative' }}>
-          <Image source={{ uri: recipe.imageUrl }} style={styles.image} />
+          <Animated.Image source={{ uri: recipe.imageUrl }} style={[styles.image, { opacity: imageOpacity }]} />
           <View style={{ position: 'absolute', top: 50, left: spacing.l, right: spacing.l, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
              <TouchableOpacity style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: colors.surface, justifyContent: 'center', alignItems: 'center' }} onPress={() => navigation.goBack()}>
                <ArrowLeftIcon size={24} color={colors.title} />

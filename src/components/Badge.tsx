@@ -9,7 +9,7 @@ interface BadgeProps {
   onPress?: () => void;
 }
 
-export const Badge = ({ label, active = false, onPress }: BadgeProps) => {
+const BadgeComponent = ({ label, active = false, onPress }: BadgeProps) => {
   const { colors } = useTheme();
 
   return (
@@ -30,6 +30,8 @@ export const Badge = ({ label, active = false, onPress }: BadgeProps) => {
     </TouchableOpacity>
   );
 };
+
+export const Badge = React.memo(BadgeComponent);
 
 const styles = StyleSheet.create({
   container: {

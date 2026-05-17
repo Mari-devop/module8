@@ -25,7 +25,6 @@ export const FavouritesScreen = () => {
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Header
         title="Favourites"
-        subtitle="Your saved mocktail recipes"
       />
 
       {savedRecipes.length > 0 ? (

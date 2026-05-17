@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useRef } from 'react';
+import { Animated, TouchableOpacity } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { StackNavigator } from './StackNavigator';
 import { FavouritesScreen } from '../screens/FavouritesScreen';
@@ -10,6 +11,43 @@ import { HomeIcon, HeartIcon, AddRecipeIcon } from '../components/icons';
 
 const Tab = createBottomTabNavigator();
 
+const TabBarButton = (props: any) => {
+  const scale = useRef(new Animated.Value(1)).current;
+
+  const handlePressIn = (e: any) => {
+    Animated.spring(scale, {
+      toValue: 0.85,
+      useNativeDriver: true,
+      speed: 40,
+      bounciness: 8,
+    }).start();
+    props.onPressIn?.(e);
+  };
+
+  const handlePressOut = (e: any) => {
+    Animated.spring(scale, {
+      toValue: 1,
+      useNativeDriver: true,
+      speed: 40,
+      bounciness: 8,
+    }).start();
+    props.onPressOut?.(e);
+  };
+
+  return (
+    <TouchableOpacity
+      {...props}
+      activeOpacity={1}
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
+    >
+      <Animated.View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', transform: [{ scale }] }}>
+        {props.children}
+      </Animated.View>
+    </TouchableOpacity>
+  );
+};
+
 export const TabNavigator = () => {
   const { colors } = useTheme();
 
@@ -18,6 +56,7 @@ export const TabNavigator = () => {
       screenOptions={{
         headerShown: false,
         tabBarShowLabel: true,
+        tabBarButton: (props) => <TabBarButton {...props} />,
         tabBarStyle: {
           backgroundColor: colors.surface,
           borderTopWidth: 1,

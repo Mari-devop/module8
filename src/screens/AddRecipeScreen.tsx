@@ -103,7 +103,6 @@ export const AddRecipeScreen = () => {
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Header
         title="Add Recipe"
-        subtitle="Create your own mocktail recipe"
       />
       
       <ScrollView style={styles.formContainer} showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
@@ -242,9 +241,6 @@ const styles = StyleSheet.create({
   },
   formContainer: {
     flex: 1,
-    marginTop: -20,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
     paddingHorizontal: spacing.l,
     paddingTop: spacing.l,
     backgroundColor: '#ffffff',

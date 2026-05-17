@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, Dimensions, FlatList, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { Header } from '../components/Header';
 import { Badge } from '../components/Badge';
@@ -50,11 +50,11 @@ export const MocktailFinderScreen = () => {
     setDisplayLimit(5);
   }, [searchQuery, activeCategory, activeIngredients]);
 
-  const toggleIngredient = (ing: string) => {
+  const toggleIngredient = useCallback((ing: string) => {
     setActiveIngredients(prev =>
       prev.includes(ing) ? prev.filter(i => i !== ing) : [...prev, ing]
     );
-  };
+  }, []);
 
   const getCategoryKeywords = (cat: string) => {
     switch (cat) {
@@ -70,44 +70,53 @@ export const MocktailFinderScreen = () => {
     }
   };
 
-  const allAvailableRecipes = [...[...customRecipes].reverse(), ...recipes];
+  const allAvailableRecipes = useMemo(
+    () => [...[...customRecipes].reverse(), ...recipes],
+    [customRecipes, recipes]
+  );
 
-  const filteredRecipes = allAvailableRecipes.filter(recipe => {
-    const titleLower = recipe.title.toLowerCase();
+  const filteredRecipes = useMemo(() => {
+    return allAvailableRecipes.filter(recipe => {
+      const titleLower = recipe.title.toLowerCase();
 
-    if (searchQuery && !titleLower.includes(searchQuery.toLowerCase())) {
-      return false;
-    }
-
-    if (activeCategory === 'My Recipes') {
-      const isCustom = customRecipes.some(cr => cr.id === recipe.id);
-      if (!isCustom) return false;
-    } else if (activeCategory !== 'All') {
-      const keywords = getCategoryKeywords(activeCategory);
-      const matchesKeyword = keywords.some(kw => titleLower.includes(kw));
-
-      const charSum = recipe.title.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-      const assignedCat = CATEGORIES[(charSum % (CATEGORIES.length - 1)) + 1];
-
-      if (!matchesKeyword && assignedCat !== activeCategory && recipe.category !== activeCategory) {
+      if (searchQuery && !titleLower.includes(searchQuery.toLowerCase())) {
         return false;
       }
-    }
 
-    if (activeIngredients.length > 0) {
-      const matchesAnyIng = activeIngredients.some(ing => titleLower.includes(ing.toLowerCase()));
-      const charSum2 = recipe.title.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) * 2;
-      const assignedIng = INGREDIENTS[charSum2 % INGREDIENTS.length];
+      if (activeCategory === 'My Recipes') {
+        const isCustom = customRecipes.some(cr => cr.id === recipe.id);
+        if (!isCustom) return false;
+      } else if (activeCategory !== 'All') {
+        const keywords = getCategoryKeywords(activeCategory);
+        const matchesKeyword = keywords.some(kw => titleLower.includes(kw));
 
-      if (!matchesAnyIng && !activeIngredients.includes(assignedIng)) {
-        return false;
+        const charSum = recipe.title.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+        const assignedCat = CATEGORIES[(charSum % (CATEGORIES.length - 1)) + 1];
+
+        if (!matchesKeyword && assignedCat !== activeCategory && recipe.category !== activeCategory) {
+          return false;
+        }
       }
-    }
 
-    return true;
-  });
+      if (activeIngredients.length > 0) {
+        const matchesAnyIng = activeIngredients.some(ing => titleLower.includes(ing.toLowerCase()));
+        const charSum2 = recipe.title.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) * 2;
+        const assignedIng = INGREDIENTS[charSum2 % INGREDIENTS.length];
 
-  const renderHeader = () => (
+        if (!matchesAnyIng && !activeIngredients.includes(assignedIng)) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+  }, [allAvailableRecipes, searchQuery, activeCategory, activeIngredients, customRecipes]);
+
+  const handleClearIngredients = useCallback(() => setActiveIngredients([]), []);
+  const handleNavigateRandom = useCallback(() => navigation.navigate(SCREENS.RANDOM_TAB), [navigation]);
+  const handleLoadMore = useCallback(() => setDisplayLimit(prev => prev + 5), []);
+
+  const renderHeader = useCallback(() => (
     <>
       <View style={styles.searchWrapper}>
         <SearchBar
@@ -138,7 +147,7 @@ export const MocktailFinderScreen = () => {
           <Badge
             label="All"
             active={activeIngredients.length === 0}
-            onPress={() => setActiveIngredients([])}
+            onPress={handleClearIngredients}
           />
           {INGREDIENTS.map((ing) => (
             <Badge
@@ -154,12 +163,12 @@ export const MocktailFinderScreen = () => {
         <View style={styles.sectionHeaderRow}>
           <Text style={[styles.sectionTitle, { color: colors.categoryTitle, marginBottom: 0, paddingHorizontal: 0 }]}>Featured Recipes</Text>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Text style={[styles.totalCountText, { color: colors.subtitle, marginRight: 12 }]}>{filteredRecipes.length} total</Text>
             <TouchableOpacity
-              style={{ backgroundColor: colors.activeBadgeBG, width: 36, height: 36, borderRadius: 18, justifyContent: 'center', alignItems: 'center' }}
-              onPress={() => navigation.navigate(SCREENS.RANDOM_TAB)}
+              style={{ flexDirection: 'row', backgroundColor: colors.activeBadgeBG, paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, justifyContent: 'center', alignItems: 'center' }}
+              onPress={handleNavigateRandom}
             >
-              <ShuffleIcon size={18} color="#FFFFFF" />
+              <ShuffleIcon size={16} color="#FFFFFF" />
+              <Text style={{ color: '#FFFFFF', marginLeft: 8, fontWeight: '600', fontSize: 14 }}>Surprise recipe</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -168,16 +177,16 @@ export const MocktailFinderScreen = () => {
         )}
       </View>
     </>
-  );
+  ), [searchQuery, activeCategory, activeIngredients, filteredRecipes.length, loading, error, colors, toggleIngredient, handleClearIngredients, handleNavigateRandom]);
 
-  const renderFooter = () => {
+  const renderFooter = useCallback(() => {
     if (filteredRecipes.length > displayLimit) {
       return (
         <View style={styles.footerContainer}>
           <TouchableOpacity
             style={[styles.browseMoreBtn, { backgroundColor: colors.surface, borderColor: colors.badgeBorder }]}
             activeOpacity={0.8}
-            onPress={() => setDisplayLimit(prev => prev + 5)}
+            onPress={handleLoadMore}
           >
             <Text style={[styles.browseMoreText, { color: colors.title }]}>Browse more</Text>
           </TouchableOpacity>
@@ -185,9 +194,9 @@ export const MocktailFinderScreen = () => {
       );
     }
     return null;
-  };
+  }, [filteredRecipes.length, displayLimit, colors, handleLoadMore]);
 
-  const renderItem = ({ item }: { item: Recipe }) => (
+  const renderItem = useCallback(({ item }: { item: Recipe }) => (
     <View style={styles.recipeListItem}>
       <RecipeCard
         title={item.title}
@@ -198,13 +207,13 @@ export const MocktailFinderScreen = () => {
         onPress={() => navigation.navigate(SCREENS.RECIPE_DETAILS, { recipe: item })}
       />
     </View>
-  );
+  ), [isFavorite, toggleFavorite, navigation]);
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Header
         title="Mocktail Finder"
-        subtitle="Discover delicious beverages"
+        subtitle=""
       />
 
       {loading ? (

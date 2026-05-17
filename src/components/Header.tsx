@@ -3,11 +3,12 @@ import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-na
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../context/ThemeContext';
 import { spacing } from '../theme/spacing';
-import { MartiniIcon, MoonIcon, SunIcon } from './icons';
+import { MoonIcon, SunIcon } from './icons';
+import { AnimatedMartiniIcon } from './AnimatedMartiniIcon';
 
 interface HeaderProps {
   title: string;
-  subtitle: string;
+  subtitle?: string;
 }
 
 export const Header = ({ title, subtitle }: HeaderProps) => {
@@ -28,8 +29,8 @@ export const Header = ({ title, subtitle }: HeaderProps) => {
         <View style={styles.headerContent}>
           <View style={{ flex: 1 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
-              <View style={{ marginRight: 12, marginTop: -14 }}>
-                <MartiniIcon size={24} color="#FFFFFF" />
+              <View style={{ marginRight: 8, marginTop: -22 }}>
+                <AnimatedMartiniIcon size={24} color="#FFFFFF" disablePulsing />
               </View>
               <Text style={[styles.headerTitle, { color: '#FFFFFF', marginBottom: 0, marginTop: 4 }]}>{title}</Text>
             </View>
